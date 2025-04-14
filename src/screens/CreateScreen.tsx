@@ -11,6 +11,7 @@ import { ActionType } from '../types';
 import CameraScreen from '../components/CameraScreen';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Alert } from 'react-native';
+import { generatePuzzle } from '../utils/sudokuGenerator';
 
 const CreateScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -18,6 +19,16 @@ const CreateScreen: React.FC = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const generatePuzzleWithDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
+    const newBoard = generatePuzzle(difficulty);
+    dispatch({ type: ActionType.START_GAME, initialBoard: newBoard });
+    Toast.show({
+      type: 'success',
+      text1: 'Puzzle Generated',
+      text2: `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} puzzle created`
+    });
+  };
 
   const processImage = async (imageUri: string) => {
     try {
@@ -199,7 +210,7 @@ const CreateScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Create Puzzle</Text>
-      
+
       <View style={styles.boardContainer}>
         <SudokuBoard onCellSelect={handleCellSelect} />
       </View>
@@ -233,6 +244,30 @@ const CreateScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.difficultyContainer}>
+        <View>
+          <Text style={styles.difficultyButtonText}>Generate:</Text>
+        </View>
+        <TouchableOpacity 
+          style={[styles.button, styles.easyButton]} 
+          onPress={() => generatePuzzleWithDifficulty('easy')}
+        >
+          <Text style={styles.difficultyButtonText}>Easy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.mediumButton]} 
+          onPress={() => generatePuzzleWithDifficulty('medium')}
+        >
+          <Text style={styles.difficultyButtonText}>Medium</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.hardButton]} 
+          onPress={() => generatePuzzleWithDifficulty('hard')}
+        >
+          <Text style={styles.difficultyButtonText}>Hard</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal visible={showCamera} animationType="slide">
         <CameraScreen
           onClose={() => setShowCamera(false)}
@@ -247,6 +282,41 @@ const CreateScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  difficultyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginBottom: 20,
+    // gap: 10,
+    width: '90%',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    elevation: 2,
+  },
+  difficultyButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  difficultyButtonText: {
+    // color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  easyButton: {
+    backgroundColor: '#4CAF50',
+  },
+  mediumButton: {
+    backgroundColor: '#FF9800',
+  },
+  hardButton: {
+    backgroundColor: '#F44336',
+  },
   loadingOverlay: {
     position: 'absolute',
     top: 0,
@@ -304,7 +374,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   saveButton: {
-    backgroundColor: '#28a745',
+    // backgroundColor: '#28a745',
+    backgroundColor: '#4287f5',
   },
   buttonText: {
     fontSize: 12,
