@@ -1,39 +1,71 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { Tabs } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GameProvider } from '../src/context/GameContext';
+import Toast, { BaseToast, ErrorToast, SuccessToast } from 'react-native-toast-message';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+export default function AppLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Tabs screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: '#007AFF',
+          tabBarInactiveTintColor: '#8E8E93',
+        }}>
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ color }: { color: string }) => (
+                <MaterialIcons name="home" size={24} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="create"
+            options={{
+              title: 'Create',
+              tabBarIcon: ({ color }: { color: string }) => (
+                <MaterialIcons name="add-box" size={24} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="game/[id]"
+            options={{
+              title: 'Solve',
+              tabBarIcon: ({ color }: { color: string }) => (
+                <MaterialIcons name="videogame-asset" size={24} color={color} />
+              ),
+            }}
+          />
+        </Tabs>
+      </GestureHandlerRootView>
+      <Toast 
+        position='bottom'
+        visibilityTime={1500}
+        config={{
+          success: ({ text1, text2 }) => (
+            <SuccessToast
+              text1={text1}
+              text2={text2}
+            />
+          ),
+          error: ({ text1, text2 }) => (
+            <ErrorToast
+              text1={text1}
+              text2={text2}
+            />
+          ),
+          info: ({ text1, text2 }) => (
+            <BaseToast
+              text1={text1}
+              text2={text2}
+            />
+          ),
+        }}
+      />
+    </>
   );
 }
