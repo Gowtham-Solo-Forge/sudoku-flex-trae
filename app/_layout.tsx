@@ -1,47 +1,35 @@
-import { Tabs } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Slot, useSegments, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { GameProvider } from '../src/context/GameContext';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import Toast, { BaseToast, ErrorToast, SuccessToast } from 'react-native-toast-message';
 
-export default function AppLayout() {
+function RootLayoutNav() {
+  const { user } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user && !inAuthGroup) {
+      // Redirect to the login page if user is not authenticated
+      router.replace('/(auth)/login');
+    } else if (user && inAuthGroup) {
+      // Redirect to the home page if user is authenticated and trying to access auth pages
+      router.replace('/(tabs)');
+    }
+  }, [user, segments]);
+
+  return <Slot />;
+}
+
+export default function RootLayout() {
   return (
-    <>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Tabs screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '#8E8E93',
-        }}>
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: 'Home',
-              tabBarIcon: ({ color }: { color: string }) => (
-                <MaterialIcons name="home" size={24} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="create"
-            options={{
-              title: 'Create',
-              tabBarIcon: ({ color }: { color: string }) => (
-                <MaterialIcons name="add-box" size={24} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="game/[id]"
-            options={{
-              title: 'Solve',
-              tabBarIcon: ({ color }: { color: string }) => (
-                <MaterialIcons name="videogame-asset" size={24} color={color} />
-              ),
-            }}
-          />
-        </Tabs>
-      </GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
       <Toast 
         position='bottom'
         visibilityTime={1500}
@@ -66,6 +54,6 @@ export default function AppLayout() {
           ),
         }}
       />
-    </>
+    </GestureHandlerRootView>
   );
 }

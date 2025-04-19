@@ -210,6 +210,27 @@ const CreateScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Create Puzzle</Text>
+      
+      <View style={styles.difficultyContainer}>
+        <TouchableOpacity 
+          style={[styles.difficultyButton, styles.easyButton]} 
+          onPress={() => generatePuzzleWithDifficulty('easy')}
+        >
+          <Text style={styles.difficultyButtonText}>Easy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.difficultyButton, styles.mediumButton]} 
+          onPress={() => generatePuzzleWithDifficulty('medium')}
+        >
+          <Text style={styles.difficultyButtonText}>Medium</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.difficultyButton, styles.hardButton]} 
+          onPress={() => generatePuzzleWithDifficulty('hard')}
+        >
+          <Text style={styles.difficultyButtonText}>Hard</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.boardContainer}>
         <SudokuBoard onCellSelect={handleCellSelect} />
@@ -244,30 +265,6 @@ const CreateScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.difficultyContainer}>
-        <View>
-          <Text style={styles.difficultyButtonText}>Generate:</Text>
-        </View>
-        <TouchableOpacity 
-          style={[styles.button, styles.easyButton]} 
-          onPress={() => generatePuzzleWithDifficulty('easy')}
-        >
-          <Text style={styles.difficultyButtonText}>Easy</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.button, styles.mediumButton]} 
-          onPress={() => generatePuzzleWithDifficulty('medium')}
-        >
-          <Text style={styles.difficultyButtonText}>Medium</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.button, styles.hardButton]} 
-          onPress={() => generatePuzzleWithDifficulty('hard')}
-        >
-          <Text style={styles.difficultyButtonText}>Hard</Text>
-        </TouchableOpacity>
-      </View>
-
       <Modal visible={showCamera} animationType="slide">
         <CameraScreen
           onClose={() => setShowCamera(false)}
@@ -284,17 +281,9 @@ const CreateScreen: React.FC = () => {
 const styles = StyleSheet.create({
   difficultyContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    // justifyContent: 'space-around',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
     paddingHorizontal: 20,
-    paddingVertical: 10,
     marginBottom: 20,
-    // gap: 10,
-    width: '90%',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    elevation: 2,
   },
   difficultyButton: {
     paddingHorizontal: 20,
@@ -304,9 +293,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   difficultyButtonText: {
-    // color: '#fff',
+    color: '#fff',
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: 16,
   },
   easyButton: {
     backgroundColor: '#4CAF50',
@@ -374,8 +363,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   saveButton: {
-    // backgroundColor: '#28a745',
-    backgroundColor: '#4287f5',
+    backgroundColor: '#28a745',
   },
   buttonText: {
     fontSize: 12,

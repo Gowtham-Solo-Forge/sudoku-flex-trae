@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "22433603872",
+    "project_id": "sudoku-zeta",
+    "storage_bucket": "sudoku-zeta.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22433603872:android:43ff0a8cc1bdb8a4373745",
+        "android_client_info": {
+          "package_name": "com.gsf.sudokuzeta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "22433603872-rmvr6o4b60mstfdqqd1m9ltbi5agr1tg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmcG6zFIUYYUVdl5PWV3Q930h0Zh7gOLw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "22433603872-rmvr6o4b60mstfdqqd1m9ltbi5agr1tg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

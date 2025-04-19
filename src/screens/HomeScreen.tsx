@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
 import PreviewGrid from '../components/PreviewGrid';
+import { useAuth } from '../context/AuthContext';
 
 interface SavedPuzzle {
   id: string;

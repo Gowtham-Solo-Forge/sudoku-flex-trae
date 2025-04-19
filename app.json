@@ -1,24 +1,30 @@
 {
   "expo": {
-    "name": "sudoku-flex-trae",
-    "slug": "sudoku-flex-trae",
+    "name": "Sudoku Zeta",
+    "slug": "sudoku-zeta",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "sudoku-zeta",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "icon": "./assets/images/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.gsf.sudokuflextrae"
+      "bundleIdentifier": "com.gsf.sudokuzeta",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.gsf.sudokuflextrae"
+      "package": "com.gsf.sudokuzeta",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -36,7 +42,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
@@ -46,8 +53,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "86e27330-441c-4e7d-941f-aa9b690c02ee"
+        "projectId": "73115198-15bf-417e-9f6c-105b9b9b6b7c"
       }
-    }
+    },
+    "owner": "gowthamprakaash"
   }
 }
