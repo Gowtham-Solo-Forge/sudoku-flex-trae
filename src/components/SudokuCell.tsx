@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Cell, GameMode } from '../types';
 import { getCellSize, moderateScale } from '../utils/dimensions';
+import { useTheme } from '../context/ThemeContext';
+import { getThemeColors } from '../utils/themeStyles';
 
 interface SudokuCellProps {
   cell: Cell;
@@ -15,15 +17,17 @@ interface SudokuCellProps {
 
 const SudokuCell: React.FC<SudokuCellProps> = ({ cell, row, col, onPress, isSelected, isInSelectedRow = false, isInSelectedCol = false }) => {
   const { value, notes, isInitial, isValid } = cell;
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   // Determine background color based on cell state
   const getBgColor = () => {
-    if (isValid === false) return '#ffcdd2'; // Light red for invalid
-    if (isInSelectedRow || isInSelectedCol) return 'rgba(227, 242, 253, 0.6)'; // Increased opacity for row/column highlight
+    if (isValid === false) return colors.invalidCellBackground;
+    if (isInSelectedRow || isInSelectedCol) return colors.highlightedRowColBackground;
     if ((Math.floor(row / 3) + Math.floor(col / 3)) % 2 === 0) {
-      return '#f5f5f5'; // Light gray for alternating 3x3 boxes
+      return colors.cellBackground;
     }
-    return '#ffffff'; // White for other cells
+    return colors.boardBackground;
   };
 
   // Render corner notes in a single line
@@ -52,6 +56,67 @@ const SudokuCell: React.FC<SudokuCellProps> = ({ cell, row, col, onPress, isSele
     );
   };
 
+  const styles = StyleSheet.create({
+    selectedCell: {
+      borderWidth: 2,
+      borderColor: colors.selectedCellBackground
+    },
+    cell: {
+      width: getCellSize(),
+      height: getCellSize(),
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      position: 'relative',
+    },
+    valueText: {
+      fontSize: moderateScale(20),
+      fontWeight: '500',
+      color: colors.cellText,
+    },
+    initialValue: {
+      fontWeight: 'bold',
+      color: colors.initialCellText,
+      backgroundColor: colors.initialCellBackground,
+      width: '100%',
+      height: '100%',
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      paddingTop: 8, // Adjust vertical alignment
+    },
+    cornerNotes: {
+      position: 'absolute',
+      top: 2,
+      left: 2,
+      maxWidth: '100%',
+      height: 10,
+      flexDirection: 'row',
+      overflow: 'hidden',
+    },
+    noteText: {
+      fontSize: moderateScale(8),
+      marginHorizontal: 1,
+      color: colors.noteText,
+    },
+    emptyNote: {
+      width: 0,
+      height: 0,
+    },
+    centerNotes: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 2,
+    },
+    centerNoteText: {
+      fontSize: moderateScale(10),
+      marginHorizontal: 2,
+      color: '#666',
+    },
+  });
+
   return (
     <TouchableOpacity
       style={[
@@ -75,66 +140,5 @@ const SudokuCell: React.FC<SudokuCellProps> = ({ cell, row, col, onPress, isSele
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  selectedCell: {
-    borderWidth: 2,
-    borderColor: '#2196f3'
-  },
-  cell: {
-    width: getCellSize(),
-    height: getCellSize(),
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    position: 'relative',
-  },
-  valueText: {
-    fontSize: moderateScale(20),
-    fontWeight: '500',
-    color: '#2196f3', // Blue color for user-entered numbers
-  },
-  initialValue: {
-    fontWeight: 'bold',
-    color: '#000', // Darker color for initial numbers
-    backgroundColor: '#f0f0f0', // Light background to highlight initial numbers
-    width: '100%',
-    height: '100%',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    paddingTop: 8, // Adjust vertical alignment
-  },
-  cornerNotes: {
-    position: 'absolute',
-    top: 2,
-    left: 2,
-    maxWidth: '100%',
-    height: 10,
-    flexDirection: 'row',
-    overflow: 'hidden',
-  },
-  noteText: {
-    fontSize: moderateScale(8),
-    marginHorizontal: 1,
-    color: '#666',
-  },
-  emptyNote: {
-    width: 0,
-    height: 0,
-  },
-  centerNotes: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 2,
-  },
-  centerNoteText: {
-    fontSize: moderateScale(10),
-    marginHorizontal: 2,
-    color: '#666',
-  },
-});
 
 export default SudokuCell;

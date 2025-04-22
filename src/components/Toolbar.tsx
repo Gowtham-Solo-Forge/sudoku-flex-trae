@@ -4,6 +4,8 @@ import { GameMode, ActionType } from '../types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useGame } from '../context/GameContext';
 import Toast from 'react-native-toast-message';
+import { useTheme } from '../context/ThemeContext';
+import { getThemeColors } from '../utils/themeStyles';
 
 interface ToolbarProps {
   selectedCell: { row: number; col: number } | null;
@@ -11,6 +13,8 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ selectedCell }) => {
   const { state, dispatch } = useGame();
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   const handleModeChange = (mode: GameMode) => {
     dispatch({ type: ActionType.SET_MODE, mode });
@@ -99,6 +103,50 @@ const Toolbar: React.FC<ToolbarProps> = ({ selectedCell }) => {
     );
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      marginTop: 15,
+      width: 360,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      marginBottom: 8,
+    },
+    button: {
+      display: 'flex',
+      flexDirection: 'column', // Change to column layout for label on to
+      width: 60,
+      height: 36,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.buttonBackground,
+      borderRadius: 6,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 1,
+      padding: 2,
+    },
+    activeButton: {
+      backgroundColor: colors.activeButtonBackground,
+      borderWidth: 1,
+      borderColor: colors.activeButtonBorder,
+    },
+    buttonText: {
+      fontSize: 16,
+      lineHeight: 16,
+    },
+    buttonLabel: {
+      fontSize: 10,
+      lineHeight: 10,
+    },
+    disabledText: {
+      opacity: 0.5,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -173,49 +221,5 @@ const Toolbar: React.FC<ToolbarProps> = ({ selectedCell }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 15,
-    width: 360,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginBottom: 8,
-  },
-  button: {
-    display: 'flex',
-    flexDirection: 'column', // Change to column layout for label on to
-    width: 60,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 6,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    padding: 2,
-  },
-  activeButton: {
-    backgroundColor: '#e3f2fd',
-    borderWidth: 1,
-    borderColor: '#2196f3',
-  },
-  buttonText: {
-    fontSize: 16,
-    lineHeight: 16,
-  },
-  buttonLabel: {
-    fontSize: 10,
-    lineHeight: 10,
-  },
-  disabledText: {
-    opacity: 0.5,
-  },
-});
 
 export default Toolbar;

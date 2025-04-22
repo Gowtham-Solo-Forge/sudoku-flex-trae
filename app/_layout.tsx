@@ -2,6 +2,7 @@ import { Slot, useSegments, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { ThemeProvider } from '../src/context/ThemeContext';
 import Toast, { BaseToast, ErrorToast, SuccessToast } from 'react-native-toast-message';
 
 function RootLayoutNav() {
@@ -28,7 +29,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <RootLayoutNav />
+        <ThemeProvider>
+          <RootLayoutNav />
+        </ThemeProvider>
       </AuthProvider>
       <Toast 
         position='bottom'

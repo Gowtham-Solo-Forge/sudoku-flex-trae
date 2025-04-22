@@ -13,6 +13,8 @@ import { Alert } from 'react-native';
 import { generatePuzzle } from '../utils/sudokuGenerator';
 import { savePuzzle } from '../services/firestore';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { getThemeColors } from '../utils/themeStyles';
 
 const CreateScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -21,6 +23,8 @@ const CreateScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   const generatePuzzleWithDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
     const newBoard = generatePuzzle(difficulty);
@@ -217,6 +221,135 @@ const CreateScreen: React.FC = () => {
     );
   };
 
+  const styles = StyleSheet.create({
+    difficultyContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingHorizontal: 20,
+      marginBottom: 20,
+    },
+    difficultyButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+      minWidth: 100,
+      alignItems: 'center',
+    },
+    difficultyButtonText: {
+      color: '#fff',
+      fontWeight: '600',
+      fontSize: 16,
+    },
+    easyButton: {
+      backgroundColor: colors.easyButtonBackground,
+    },
+    mediumButton: {
+      backgroundColor: colors.mediumButtonBackground,
+    },
+    hardButton: {
+      backgroundColor: colors.hardButtonBackground,
+    },
+    loadingOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.loadingOverlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+    },
+    loadingContent: {
+      backgroundColor: colors.loadingBackground,
+      padding: 20,
+      borderRadius: 10,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      alignItems: 'center',
+      paddingTop: 20,
+      paddingBottom: 30, // Add padding at the bottom for scrolling
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 20,
+    },
+    boardContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      width: '90%',
+      marginVertical: 10,
+      flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
+    },
+    button: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.buttonBackground,
+      padding: 8,
+      borderRadius: 6,
+      width: 65,
+      height: 50,
+      elevation: 2,
+      margin: 4, // Add margin for when buttons wrap
+    },
+    saveButton: {
+      backgroundColor: colors.saveButtonBackground,
+    },
+    buttonText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: '#000',
+      marginTop: 4,
+    },
+    difficultyButtonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+      width: '90%',
+      marginVertical: 10,
+      backgroundColor: colors.activeButtonBackground,
+      padding: 8,
+      borderRadius: 6,
+      elevation: 2,
+      flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
+    },
+    loadingContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.loadingOverlay,
+      zIndex: 1,
+      borderRadius: 8,
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: 16,
+      color: '#007AFF',
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       {isLoading && (
@@ -291,134 +424,5 @@ const CreateScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  difficultyContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  difficultyButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minWidth: 100,
-    alignItems: 'center',
-  },
-  difficultyButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  easyButton: {
-    backgroundColor: '#4CAF50',
-  },
-  mediumButton: {
-    backgroundColor: '#FF9800',
-  },
-  hardButton: {
-    backgroundColor: '#F44336',
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  loadingContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 30, // Add padding at the bottom for scrolling
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  boardContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '90%',
-    marginVertical: 10,
-    flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
-  },
-  button: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    padding: 8,
-    borderRadius: 6,
-    width: 65,
-    height: 50,
-    elevation: 2,
-    margin: 4, // Add margin for when buttons wrap
-  },
-  saveButton: {
-    backgroundColor: 'rgb(94, 172, 255)',
-  },
-  buttonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000',
-    marginTop: 4,
-  },
-  difficultyButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    width: '90%',
-    marginVertical: 10,
-    backgroundColor: 'rgb(147, 196, 253)',
-    padding: 8,
-    borderRadius: 6,
-    elevation: 2,
-    flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    zIndex: 1,
-    borderRadius: 8,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#007AFF',
-  },
-});
 
 export default CreateScreen;

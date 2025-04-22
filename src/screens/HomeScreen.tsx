@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -13,20 +13,25 @@ import Toast from 'react-native-toast-message';
 const HomeScreen: React.FC = () => {
   const [savedPuzzles, setSavedPuzzles] = useState<PuzzleDocument[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const router = useRouter();
   const { user } = useAuth();
+  const refreshing = useRef(false);
 
   useFocusEffect(
     React.useCallback(() => {
       if (user) {
-        loadSavedPuzzles();
+        loadSavedPuzzles(false);
       }
     }, [user])
   );
 
-  const loadSavedPuzzles = async () => {
+  const loadSavedPuzzles = async (showLoadingIndicator = true) => {
     try {
-      setLoading(true);
+      if (showLoadingIndicator) {
+        setLoading(true);
+      }
+      refreshing.current = true;
       const puzzles = await getUserPuzzles();
       setSavedPuzzles(puzzles);
     } catch (error) {
@@ -38,6 +43,7 @@ const HomeScreen: React.FC = () => {
       });
     } finally {
       setLoading(false);
+      refreshing.current = false;
     }
   };
 
@@ -103,9 +109,20 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
+  const handleRefresh = () => {
+    if (!refreshing.current) {
+      loadSavedPuzzles(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>My Puzzles</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>My Puzzles</Text>
+        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
+          <MaterialIcons name="refresh" size={24} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
       
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -146,11 +163,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 20,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    paddingHorizontal: 20,
+  },
+  refreshButton: {
+    padding: 8,
   },
   listContainer: {
     padding: 20,
