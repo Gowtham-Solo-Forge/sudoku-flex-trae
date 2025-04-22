@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Cell, GameMode } from '../types';
+import { getCellSize, moderateScale } from '../utils/dimensions';
 
 interface SudokuCellProps {
   cell: Cell;
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
     borderColor: '#2196f3'
   },
   cell: {
-    width: 40,
-    height: 40,
+    width: getCellSize(),
+    height: getCellSize(),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   valueText: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: '500',
     color: '#2196f3', // Blue color for user-entered numbers
   },
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   noteText: {
-    fontSize: 8,
+    fontSize: moderateScale(8),
     marginHorizontal: 1,
     color: '#666',
   },
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   centerNoteText: {
-    fontSize: 10,
+    fontSize: moderateScale(10),
     marginHorizontal: 2,
     color: '#666',
   },

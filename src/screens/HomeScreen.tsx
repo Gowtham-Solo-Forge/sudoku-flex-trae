@@ -1,44 +1,50 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
 import PreviewGrid from '../components/PreviewGrid';
 import { useAuth } from '../context/AuthContext';
+import { getUserPuzzles, deletePuzzle, PuzzleDocument } from '../services/firestore';
+import Toast from 'react-native-toast-message';
 
-interface SavedPuzzle {
-  id: string;
-  board: any[][];
-  createdAt: string;
-}
+// Using PuzzleDocument interface from firestore service
 
 const HomeScreen: React.FC = () => {
-  const [savedPuzzles, setSavedPuzzles] = useState<SavedPuzzle[]>([]);
+  const [savedPuzzles, setSavedPuzzles] = useState<PuzzleDocument[]>([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   useFocusEffect(
     React.useCallback(() => {
-      loadSavedPuzzles();
-    }, [])
+      if (user) {
+        loadSavedPuzzles();
+      }
+    }, [user])
   );
 
   const loadSavedPuzzles = async () => {
     try {
-      const puzzlesJson = await AsyncStorage.getItem('savedPuzzles');
-      if (puzzlesJson) {
-        const puzzles = JSON.parse(puzzlesJson);
-        setSavedPuzzles(puzzles.sort((a: SavedPuzzle, b: SavedPuzzle) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ));
-      }
+      setLoading(true);
+      const puzzles = await getUserPuzzles();
+      setSavedPuzzles(puzzles);
     } catch (error) {
       console.error('Error loading puzzles:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load puzzles'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return '';
+    
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -48,21 +54,29 @@ const HomeScreen: React.FC = () => {
     });
   };
 
-  const deletePuzzle = async (id: string) => {
+  const handleDeletePuzzle = async (id: string) => {
     try {
-      const updatedPuzzles = savedPuzzles.filter(puzzle => puzzle.id !== id);
-      await AsyncStorage.setItem('savedPuzzles', JSON.stringify(updatedPuzzles));
-      setSavedPuzzles(updatedPuzzles);
+      await deletePuzzle(id);
+      setSavedPuzzles(savedPuzzles.filter(puzzle => puzzle.id !== id));
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Puzzle deleted successfully'
+      });
     } catch (error) {
       console.error('Error deleting puzzle:', error);
-      Alert.alert('Error', 'Failed to delete puzzle');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to delete puzzle'
+      });
     }
   };
 
-  const renderItem = ({ item }: { item: SavedPuzzle }) => (
+  const renderItem = ({ item }: { item: PuzzleDocument }) => (
     <TouchableOpacity 
       style={styles.puzzleItem}
-      onPress={() => router.push(`/game/${item.id}`)}
+      onPress={() => router.push(`/solve/${item.id}`)}
     >
       <View style={styles.puzzleContent}>
         <PreviewGrid board={item.board} />
@@ -78,7 +92,7 @@ const HomeScreen: React.FC = () => {
               'Are you sure you want to delete this puzzle?',
               [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => deletePuzzle(item.id) }
+                { text: 'Delete', style: 'destructive', onPress: () => handleDeletePuzzle(item.id) }
               ]
             );
           }}
@@ -93,7 +107,12 @@ const HomeScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>My Puzzles</Text>
       
-      {savedPuzzles.length === 0 ? (
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading puzzles...</Text>
+        </View>
+      ) : savedPuzzles.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No puzzles created yet</Text>
           <Text style={styles.emptySubText}>Go to Create tab to make your first puzzle!</Text>
@@ -111,6 +130,17 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#555',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

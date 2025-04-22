@@ -1,14 +1,11 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { GameProvider } from '../../src/context/GameContext';
-import HomeScreen from '../../src/screens/HomeScreen';
+import SettingsScreen from '../../src/screens/SettingsScreen';
 
-export default function Index() {
+export default function Settings() {
   return (
     <View style={styles.container}>
-      <GameProvider>
-        <HomeScreen />
-      </GameProvider>
+      <SettingsScreen />
     </View>
   );
 }

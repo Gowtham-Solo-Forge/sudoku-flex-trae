@@ -17,7 +17,7 @@ function RootLayoutNav() {
       router.replace('/(auth)/login');
     } else if (user && inAuthGroup) {
       // Redirect to the home page if user is authenticated and trying to access auth pages
-      router.replace('/(tabs)');
+      router.replace('/(home)');
     }
   }, [user, segments]);
 

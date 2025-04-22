@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import SudokuBoard from '../components/SudokuBoard';
 import NumberPad from '../components/NumberPad';
 import Toolbar from '../components/Toolbar';
@@ -15,24 +14,7 @@ const GameScreen: React.FC = () => {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const { id } = useLocalSearchParams();
 
-  useEffect(() => {
-    const loadPuzzle = async () => {
-      try {
-        const puzzlesJson = await AsyncStorage.getItem('savedPuzzles');
-        if (puzzlesJson) {
-          const puzzles = JSON.parse(puzzlesJson);
-          const puzzle = puzzles.find((p: any) => p.id === id);
-          if (puzzle) {
-            dispatch({ type: ActionType.START_GAME, initialBoard: puzzle.board });
-          }
-        }
-      } catch (error) {
-        console.error('Error loading puzzle:', error);
-      }
-    };
-
-    loadPuzzle();
-  }, [dispatch, id]);
+  // Puzzle loading is now handled in the route component
 
   const handleCellSelect = (row: number, col: number) => {
     setSelectedCell({ row, col });
@@ -42,15 +24,17 @@ const GameScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       
-      <GameClock />
-      
-      <View style={styles.boardContainer}>
-        <SudokuBoard onCellSelect={handleCellSelect} />
-      </View>
-      
-      <NumberPad selectedCell={selectedCell} />
-      
-      <Toolbar selectedCell={selectedCell} />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={true}>
+        <GameClock />
+        
+        <View style={styles.boardContainer}>
+          <SudokuBoard onCellSelect={handleCellSelect} />
+        </View>
+        
+        <NumberPad selectedCell={selectedCell} />
+        
+        <Toolbar selectedCell={selectedCell} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -59,8 +43,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollContent: {
     alignItems: 'center',
-    paddingTop: 20,
+    paddingVertical: 20,
   },
   title: {
     fontSize: 24,

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Modal, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
@@ -12,6 +11,8 @@ import CameraScreen from '../components/CameraScreen';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Alert } from 'react-native';
 import { generatePuzzle } from '../utils/sudokuGenerator';
+import { savePuzzle } from '../services/firestore';
+import { useAuth } from '../context/AuthContext';
 
 const CreateScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -19,6 +20,7 @@ const CreateScreen: React.FC = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const generatePuzzleWithDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
     const newBoard = generatePuzzle(difficulty);
@@ -99,7 +101,7 @@ const CreateScreen: React.FC = () => {
     setSelectedCell({ row, col });
   };
 
-  const savePuzzle = async () => {
+  const handleSavePuzzle = async () => {
     // Check if there are any numbers on the board
     const hasNumbers = state.board.some(row => row.some(cell => cell.value !== null));
     
@@ -108,6 +110,16 @@ const CreateScreen: React.FC = () => {
         type: 'error',
         text1: 'Empty Board',
         text2: 'Please add some numbers before saving'
+      });
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!user) {
+      Toast.show({
+        type: 'error',
+        text1: 'Authentication Required',
+        text2: 'Please log in to save puzzles'
       });
       return;
     }
@@ -124,6 +136,8 @@ const CreateScreen: React.FC = () => {
           text: 'Save',
           onPress: async () => {
             try {
+              setIsLoading(true);
+              
               // Mark all filled cells as initial cells
               const finalBoard = state.board.map(row =>
                 row.map(cell => ({
@@ -133,25 +147,15 @@ const CreateScreen: React.FC = () => {
                 }))
               );
 
-              // Get existing puzzles
-              const existingPuzzlesJson = await AsyncStorage.getItem('savedPuzzles');
-              const existingPuzzles = existingPuzzlesJson ? JSON.parse(existingPuzzlesJson) : [];
-
-              // Create new puzzle object
-              const newPuzzle = {
-                id: Date.now().toString(),
-                board: finalBoard,
-                createdAt: new Date().toISOString(),
-              };
-
-              // Add new puzzle to the list
-              const updatedPuzzles = [...existingPuzzles, newPuzzle];
-
-              // Save updated list
-              await AsyncStorage.setItem('savedPuzzles', JSON.stringify(updatedPuzzles));
+              // Save to Firestore
+              const puzzleId = await savePuzzle(finalBoard);
 
               // Show success message
-              Toast.show({ type: 'success', text1: 'Puzzle Saved', text2: `Puzzle ID: ${newPuzzle.id}` });
+              Toast.show({ 
+                type: 'success', 
+                text1: 'Puzzle Saved', 
+                text2: `Puzzle saved to your collection` 
+              });
 
               // Navigate back
               router.back();
@@ -166,9 +170,15 @@ const CreateScreen: React.FC = () => {
                 }))
               );
               dispatch({ type: ActionType.START_GAME, initialBoard: emptyBoard });
-              // setSelectedCell(null);
             } catch (error) {
               console.error('Error saving puzzle:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to save puzzle'
+              });
+            } finally {
+              setIsLoading(false);
             }
           },
         },
@@ -209,32 +219,6 @@ const CreateScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Create Puzzle</Text>
-      
-      <View style={styles.difficultyContainer}>
-        <TouchableOpacity 
-          style={[styles.difficultyButton, styles.easyButton]} 
-          onPress={() => generatePuzzleWithDifficulty('easy')}
-        >
-          <Text style={styles.difficultyButtonText}>Easy</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.difficultyButton, styles.mediumButton]} 
-          onPress={() => generatePuzzleWithDifficulty('medium')}
-        >
-          <Text style={styles.difficultyButtonText}>Medium</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.difficultyButton, styles.hardButton]} 
-          onPress={() => generatePuzzleWithDifficulty('hard')}
-        >
-          <Text style={styles.difficultyButtonText}>Hard</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.boardContainer}>
-        <SudokuBoard onCellSelect={handleCellSelect} />
-      </View>
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContent}>
@@ -244,26 +228,56 @@ const CreateScreen: React.FC = () => {
         </View>
       )}
       
-      <NumberPad selectedCell={selectedCell} />
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setShowCamera(true)}>
-          <MaterialIcons name="camera-alt" size={20} color="#000" />
-          <Text style={styles.buttonText}>Camera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={pickImage}>
-          <MaterialIcons name="image" size={20} color="#000" />
-          <Text style={styles.buttonText}>Gallery</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={clearBoard}>
-          <MaterialIcons name="clear" size={20} color="#000" />
-          <Text style={styles.buttonText}>Clear</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={savePuzzle}>
-          <MaterialIcons name="save" size={20} color="#000" />
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={true}>
+        <Text style={styles.title}>Create Puzzle</Text>
+
+        <View style={styles.boardContainer}>
+          <SudokuBoard onCellSelect={handleCellSelect} />
+        </View>
+        
+        <NumberPad selectedCell={selectedCell} />
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={() => setShowCamera(true)}>
+            <MaterialIcons name="camera-alt" size={20} color="#000" />
+            <Text style={styles.buttonText}>Camera</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={pickImage}>
+            <MaterialIcons name="image" size={20} color="#000" />
+            <Text style={styles.buttonText}>Gallery</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={clearBoard}>
+            <MaterialIcons name="clear" size={20} color="#000" />
+            <Text style={styles.buttonText}>Clear</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSavePuzzle}>
+            <MaterialIcons name="save" size={20} color="#000" />
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.difficultyButtonContainer}>
+          <Text style={styles.buttonText}>Generate</Text>
+          <TouchableOpacity 
+            style={[styles.button, styles.easyButton]} 
+            onPress={() => generatePuzzleWithDifficulty('easy')}
+          >
+            <Text style={styles.buttonText}>Easy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.mediumButton]} 
+            onPress={() => generatePuzzleWithDifficulty('medium')}
+          >
+            <Text style={styles.buttonText}>Medium</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.hardButton]} 
+            onPress={() => generatePuzzleWithDifficulty('hard')}
+          >
+            <Text style={styles.buttonText}>Hard</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       <Modal visible={showCamera} animationType="slide">
         <CameraScreen
@@ -333,8 +347,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollContent: {
     alignItems: 'center',
     paddingTop: 20,
+    paddingBottom: 30, // Add padding at the bottom for scrolling
   },
   title: {
     fontSize: 24,
@@ -350,6 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     width: '90%',
     marginVertical: 10,
+    flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
   },
   button: {
     flexDirection: 'column',
@@ -361,15 +379,28 @@ const styles = StyleSheet.create({
     width: 65,
     height: 50,
     elevation: 2,
+    margin: 4, // Add margin for when buttons wrap
   },
   saveButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: 'rgb(94, 172, 255)',
   },
   buttonText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#000',
     marginTop: 4,
+  },
+  difficultyButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    width: '90%',
+    marginVertical: 10,
+    backgroundColor: 'rgb(147, 196, 253)',
+    padding: 8,
+    borderRadius: 6,
+    elevation: 2,
+    flexWrap: 'wrap', // Allow buttons to wrap on smaller screens
   },
   loadingContainer: {
     position: 'absolute',

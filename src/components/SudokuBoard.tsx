@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Board, GameMode, ActionType } from '../types';
 import SudokuCell from './SudokuCell';
 import { useGame } from '../context/GameContext';
+import { getBoardSize } from '../utils/dimensions';
 
 interface SudokuBoardProps {
   onCellSelect: (row: number, col: number) => void;
@@ -46,8 +47,8 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ onCellSelect }) => {
 
 const styles = StyleSheet.create({
   board: {
-    width: 360,
-    height: 360,
+    width: getBoardSize(),
+    height: getBoardSize(),
     borderWidth: 2,
     borderColor: '#000',
     position: 'relative',
@@ -64,22 +65,22 @@ const styles = StyleSheet.create({
   horizontalLine1: {
     width: '100%',
     height: 2,
-    top: 120 - 1, // Adjust for border width
+    top: getBoardSize() / 3 - 1, // Adjust for border width
   },
   horizontalLine2: {
     width: '100%',
     height: 2,
-    top: 240 - 1, // Adjust for border width
+    top: (getBoardSize() / 3) * 2 - 1, // Adjust for border width
   },
   verticalLine1: {
     width: 2,
     height: '100%',
-    left: 120 - 1, // Adjust for border width
+    left: getBoardSize() / 3 - 1, // Adjust for border width
   },
   verticalLine2: {
     width: 2,
     height: '100%',
-    left: 240 - 1, // Adjust for border width
+    left: (getBoardSize() / 3) * 2 - 1, // Adjust for border width
   },
 });
 

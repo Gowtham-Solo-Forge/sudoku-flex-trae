@@ -2,8 +2,7 @@ import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { GameProvider } from '../../src/context/GameContext';
 
-export default function TabsLayout() {
-
+export default function HomeLayout() {
   return (
     <GameProvider>
       <Tabs screenOptions={{
@@ -26,15 +25,6 @@ export default function TabsLayout() {
             title: 'Create',
             tabBarIcon: ({ color }: { color: string }) => (
               <MaterialIcons name="add-box" size={24} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="game/[id]"
-          options={{
-            title: 'Solve',
-            tabBarIcon: ({ color }: { color: string }) => (
-              <MaterialIcons name="videogame-asset" size={24} color={color} />
             ),
           }}
         />

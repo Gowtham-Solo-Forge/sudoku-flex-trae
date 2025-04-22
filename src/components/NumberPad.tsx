@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { GameMode, ActionType } from '../types';
 import { useGame } from '../context/GameContext';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getBoardSize, getNumberButtonSize, moderateScale } from '../utils/dimensions';
 
 interface NumberPadProps {
   selectedCell: { row: number; col: number } | null;
@@ -106,7 +107,7 @@ const NumberPad: React.FC<NumberPadProps> = ({ selectedCell }) => {
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
-    width: 360,
+    width: getBoardSize(),
   },
   row: {
     flexDirection: 'row',
@@ -114,8 +115,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    width: 65,
-    height: 50,
+    width: getNumberButtonSize().width,
+    height: getNumberButtonSize().height,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   buttonText: {
-    fontSize: 24,
+    fontSize: moderateScale(20),
     fontWeight: '500',
   },
   clearButton: {
